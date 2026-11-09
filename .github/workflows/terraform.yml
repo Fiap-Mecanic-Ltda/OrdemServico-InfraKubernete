@@ -62,9 +62,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Enquanto a AWS nao estiver configurada para este repositorio (secrets
+      # ausentes), o plan vira so fmt + validate offline, sem falhar o PR.
+      - name: Confere se ha credenciais AWS
+        id: creds
+        env:
+          CHAVE: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -n "$CHAVE" ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Sem AWS_ACCESS_KEY_ID neste repositorio: rodando so fmt e validate (sem backend), sem plan."
+          fi
+
       # Chave estatica do terraform-deployer: a role de OIDC e criada por este
       # proprio stack, e a mesma chave le o state remoto do InfraKubernete.
       - name: Configura credenciais AWS
+        if: steps.creds.outputs.ok == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -79,12 +94,18 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Terraform init
+        if: steps.creds.outputs.ok == 'true'
         run: terraform init -input=false
+
+      - name: Terraform init (sem backend)
+        if: steps.creds.outputs.ok != 'true'
+        run: terraform init -input=false -backend=false
 
       - name: Terraform validate
         run: terraform validate
 
       - name: Terraform plan
+        if: steps.creds.outputs.ok == 'true'
         run: terraform plan -input=false
 
   apply:
