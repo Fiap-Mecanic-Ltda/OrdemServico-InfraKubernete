@@ -20,6 +20,10 @@ spec:
     spec:
       # A API nao fala com a API do Kubernetes: sem token da service account.
       automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: os-service
           image: mechanicltda-os:latest
@@ -68,13 +72,19 @@ spec:
                   name: os-service-secrets
                   key: NEW_RELIC_LICENSE_KEY
                   optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
           resources:
             requests:
               cpu: "100m"
               memory: "192Mi"
+              ephemeral-storage: "128Mi"
             limits:
               cpu: "500m"
               memory: "384Mi"
+              ephemeral-storage: "512Mi"
           # Cobre as migrations com retry (ate 10 tentativas) no boot sem deixar
           # o liveness/readiness reiniciar o container no meio.
           startupProbe:
