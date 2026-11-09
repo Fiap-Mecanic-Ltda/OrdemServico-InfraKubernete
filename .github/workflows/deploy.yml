@@ -206,9 +206,9 @@ jobs:
           fi
 
           RABBITMQ_USER=$(opcional "$PREFIXO/mensageria/rabbitmq-user")
-          RABBITMQ_PASSWORD=$(opcional "$PREFIXO/mensageria/rabbitmq-password")
-          [ -n "$RABBITMQ_PASSWORD" ] && echo "::add-mask::$RABBITMQ_PASSWORD"
-          if [ -z "$RABBITMQ_PASSWORD" ]; then
+          RABBITMQ_SEGREDO=$(opcional "$PREFIXO/mensageria/rabbitmq-segredo")
+          [ -n "$RABBITMQ_SEGREDO" ] && echo "::add-mask::$RABBITMQ_SEGREDO"
+          if [ -z "$RABBITMQ_SEGREDO" ]; then
             echo "::notice::Sem credenciais do RabbitMQ no SSM: a Saga precisa continuar desligada (Saga__Habilitada=false)."
           fi
 
@@ -217,7 +217,7 @@ jobs:
             --from-literal=ConnectionStrings__DefaultConnection="$CONNECTION_STRING" \
             --from-literal=JWT_SECRET_KEY="$JWT" \
             --from-literal=RabbitMq__Usuario="$RABBITMQ_USER" \
-            --from-literal=RabbitMq__Senha="$RABBITMQ_PASSWORD" \
+            --from-literal=RabbitMq__Senha="$RABBITMQ_SEGREDO" \
             --from-literal=NEW_RELIC_LICENSE_KEY="$NEW_RELIC_LICENSE_KEY" \
             --from-literal=NEW_RELIC_PROFILING="$NEW_RELIC_PROFILING" \
             --dry-run=client -o yaml > /tmp/secret-manifest.yaml
