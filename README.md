@@ -96,7 +96,7 @@ O Environment `production` precisa existir (apply e deploy).
 ## Primeira subida (ordem)
 
 1. InfraKubernete com o suporte aos microsserviços aplicado (porta 8081, outputs novos e, para a
-   Saga, `RABBITMQ_PASSWORD`).
+   Saga, `RABBITMQ_SEGREDO`).
 2. OrdemServico-InfraSGBD (`apply`): banco e connection string no SSM.
 3. Este repositório (`terraform.yml`): ECR, role e target group. Copie `github_actions_role_arn`
    para o secret `AWS_ROLE_ARN` daqui e do OrdemServico-service.
