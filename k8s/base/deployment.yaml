@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: os-service
+  namespace: ordem-servico
+  labels:
+    app.kubernetes.io/part-of: mechanicltda
+    app.kubernetes.io/name: os-service
+spec:
+  # O HPA (hpa.yaml) controla as replicas; este valor so vale ate a primeira
+  # recomendacao dele.
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: os-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: os-service
+    spec:
+      containers:
+        - name: os-service
+          image: mechanicltda-os:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: os-service-config
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: ConnectionStrings__DefaultConnection
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: JWT_SECRET_KEY
+            # Opcionais: sem RabbitMQ no cluster a Saga fica desligada de
+            # qualquer forma (Saga__Habilitada no ConfigMap).
+            - name: RabbitMq__Usuario
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: RabbitMq__Usuario
+                  optional: true
+            - name: RabbitMq__Senha
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: RabbitMq__Senha
+                  optional: true
+            # New Relic: "1" liga o profiler do agente .NET instalado na imagem.
+            - name: CORECLR_ENABLE_PROFILING
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: NEW_RELIC_PROFILING
+                  optional: true
+            - name: NEW_RELIC_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: os-service-secrets
+                  key: NEW_RELIC_LICENSE_KEY
+                  optional: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "384Mi"
+          # Cobre as migrations com retry (ate 10 tentativas) no boot sem deixar
+          # o liveness/readiness reiniciar o container no meio.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 15
+            failureThreshold: 6

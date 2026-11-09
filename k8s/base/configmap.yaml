@@ -1,0 +1,41 @@
+# Configuracao nao sensivel do OS Service. Segredos (connection string, chave
+# JWT, credenciais do RabbitMQ, New Relic) vem do Secret "os-service-secrets",
+# montado pela pipeline a partir do SSM (ver .github/workflows/deploy.yml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: os-service-config
+  namespace: ordem-servico
+  labels:
+    app.kubernetes.io/part-of: mechanicltda
+    app.kubernetes.io/name: os-service
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+
+  # Mesmos emissores e audiencia do monolito: os tokens continuam sendo emitidos
+  # pelo MechanicLtda (/auth/login) e pela Lambda (/auth/cpf).
+  JwtSettings__Issuer: "MechanicLtda.API"
+  JwtSettings__IssuerCpf: "MechanicLtda.Auth.Cpf"
+  JwtSettings__Audience: "MechanicLtda.Clients"
+
+  # Cliente e veiculo continuam no monolito; a chamada fica dentro do cluster.
+  Integracoes__MechanicLtdaApi__BaseUrl: "http://mechanicltda-api.mechanicltda.svc.cluster.local:8080"
+
+  # Saga desligada ate Billing e Execucao estarem no ar (Etapa 9). Desligada, a
+  # API funciona como na Fase 3 e nao conecta no RabbitMQ.
+  Saga__Habilitada: "false"
+  Saga__PrazoDiagnosticoHoras: "48"
+  Saga__PrazoAprovacaoHoras: "72"
+  Mensageria__Transporte: "RabbitMq"
+  RabbitMq__Host: "rabbitmq.mensageria.svc.cluster.local"
+  RabbitMq__VirtualHost: "/"
+  # Simuladores nunca em producao.
+  Simuladores__Habilitados: "false"
+
+  # Agente APM do New Relic (so coleta com NEW_RELIC_LICENSE_KEY, que vem do Secret).
+  NEW_RELIC_APP_NAME: "mechanicltda-os-service"
+  NEW_RELIC_DISTRIBUTED_TRACING_ENABLED: "true"
+  NEW_RELIC_APPLICATION_LOGGING_ENABLED: "true"
+  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_ENABLED: "true"
+  NEW_RELIC_APPLICATION_LOGGING_FORWARDING_CONTEXT_DATA_ENABLED: "true"
+  NEW_RELIC_LABELS: "ambiente:prod;projeto:mechanicltda;servico:os"
