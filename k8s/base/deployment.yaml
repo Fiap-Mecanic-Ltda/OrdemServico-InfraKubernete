@@ -18,6 +18,8 @@ spec:
       labels:
         app.kubernetes.io/name: os-service
     spec:
+      # A API nao fala com a API do Kubernetes: sem token da service account.
+      automountServiceAccountToken: false
       containers:
         - name: os-service
           image: mechanicltda-os:latest
