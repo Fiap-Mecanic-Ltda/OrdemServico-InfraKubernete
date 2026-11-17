@@ -1,0 +1,6 @@
+# Copie para terraform.tfvars se precisar mudar algum padrao. Nao ha segredo
+# neste stack: a connection string vem do OrdemServico-InfraSGBD e a chave JWT,
+# o New Relic e o RabbitMQ vem do InfraKubernete (todos pelo SSM).
+
+# Virada (Etapa 9): manda /api/ordemservico* do monolito para o OS Service.
+# rotear_trafego_alb = true
