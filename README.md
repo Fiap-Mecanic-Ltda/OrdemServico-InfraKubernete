@@ -62,7 +62,7 @@ OrdemServico-InfraKubernete/
 │   ├── github_oidc.tf       # role de CI/CD do serviço (ECR, SSM, S3 deploy/os/)
 │   └── outputs.tf
 ├── k8s/
-│   ├── base/                # Namespace, ConfigMap, Deployment, Service, HPA
+│   ├── base/                # Namespace, ConfigMap, Deployment, Service, HPA (só CPU, até 3 réplicas)
 │   └── overlays/prod/       # NodePort 8081 + imagePullSecrets do ECR
 ├── scripts/
 │   ├── esperar-ssm.sh       # espera o Run Command terminar (mesmo do InfraKubernete)
