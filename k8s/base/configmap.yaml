@@ -21,9 +21,9 @@ data:
   # Cliente e veiculo continuam no monolito; a chamada fica dentro do cluster.
   Integracoes__MechanicLtdaApi__BaseUrl: "http://mechanicltda-api.mechanicltda.svc.cluster.local:8080"
 
-  # Saga desligada ate Billing e Execucao estarem no ar (Etapa 9). Desligada, a
-  # API funciona como na Fase 3 e nao conecta no RabbitMQ.
-  Saga__Habilitada: "false"
+  # Saga ligada (Etapa 9): Billing e Execucao no ar, RabbitMQ no namespace
+  # mensageria. Desligada, a API funciona como na Fase 3 e nao conecta no RabbitMQ.
+  Saga__Habilitada: "true"
   Saga__PrazoDiagnosticoHoras: "48"
   Saga__PrazoAprovacaoHoras: "72"
   Mensageria__Transporte: "RabbitMq"

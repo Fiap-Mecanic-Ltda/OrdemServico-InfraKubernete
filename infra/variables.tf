@@ -53,10 +53,10 @@ variable "rotear_trafego_alb" {
   type        = bool
   description = <<-EOT
     Cria a regra no listener do ALB interno que manda as rotas de OS para este
-    servico. Fica false ate a virada (Etapa 9): enquanto isso, o monolito continua
-    atendendo /api/ordemservico e o target group existe sem trafego.
+    servico. Ligado desde a virada (Etapa 9). Com false, o monolito volta a
+    atender /api/ordemservico e o target group fica sem trafego.
   EOT
-  default     = false
+  default     = true
 }
 
 variable "alb_rule_priority" {
